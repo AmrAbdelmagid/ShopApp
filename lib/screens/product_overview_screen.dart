@@ -18,4 +18,3 @@ class ProductOverviewScreen extends StatelessWidget {
     );
   }
 }
-

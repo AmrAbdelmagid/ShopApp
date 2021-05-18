@@ -7,12 +7,11 @@ class ProductItem extends StatelessWidget {
   // final String imageUrl;
   // final String id;
   // final String title;
-  //
   // ProductItem({this.id, this.title, this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
-    final product = Provider.of<Product>(context);
+    final product = Provider.of<Product>(context, listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GestureDetector(
@@ -30,12 +29,16 @@ class ProductItem extends StatelessWidget {
           footer: GridTileBar(
             title: Text(product.title, textAlign: TextAlign.center),
             backgroundColor: Colors.black87,
-            leading: IconButton(
-              icon: Icon(product.isFavorite ? Icons.favorite : Icons.favorite_border),
-              onPressed: () {
-                product.toggleFavoriteStatue();
-              },
-              color: Theme.of(context).accentColor,
+            leading: Consumer<Product>(
+              builder: (ctx, product,_) => IconButton( // _ refers to the child which I do not need it here!
+                icon: Icon(product.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border),
+                onPressed: () {
+                  product.toggleFavoriteStatue();
+                },
+                color: Theme.of(context).accentColor,
+              ),
             ),
             trailing: IconButton(
               icon: Icon(Icons.shopping_cart),
