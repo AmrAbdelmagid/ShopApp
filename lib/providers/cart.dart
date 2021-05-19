@@ -20,9 +20,18 @@ class CartProvider with ChangeNotifier {
   Map<String, CartItem> get items {
     return {..._items};
   }
+
   int get itemCount {
     return _items.length;
-}
+  }
+
+  totalAmount() {
+    var total = 0.0;
+    _items.forEach((key, value) {
+      total += value.price * value.quantity;
+    });
+    return total;
+  }
 
   void addItem({String productId, String title, double price, int quantity}) {
     _items.update(
