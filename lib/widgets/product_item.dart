@@ -13,7 +13,7 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
-    final cart = Provider.of<CartProvider>(context,listen: false);
+    final cart = Provider.of<CartProvider>(context, listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GestureDetector(
@@ -32,7 +32,8 @@ class ProductItem extends StatelessWidget {
             title: Text(product.title, textAlign: TextAlign.center),
             backgroundColor: Colors.black87,
             leading: Consumer<Product>(
-              builder: (ctx, product,_) => IconButton( // _ refers to the child which I do not need it here!
+              builder: (ctx, product, _) => IconButton(
+                // _ refers to the child which I do not need it here!
                 icon: Icon(product.isFavorite
                     ? Icons.favorite
                     : Icons.favorite_border),
@@ -45,7 +46,23 @@ class ProductItem extends StatelessWidget {
             trailing: IconButton(
               icon: Icon(Icons.shopping_cart),
               onPressed: () {
-                cart.addItem(productId: product.id,title: product.title,price: product.price);
+                cart.addItem(
+                    productId: product.id,
+                    title: product.title,
+                    price: product.price);
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Added item to the cart!'),
+                    duration: Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () {
+                        cart.removeItem(product.id);
+                      },
+                    ),
+                  ),
+                );
               },
               color: Theme.of(context).accentColor,
             ),
