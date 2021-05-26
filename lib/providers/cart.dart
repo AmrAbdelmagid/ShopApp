@@ -25,8 +25,8 @@ class CartProvider with ChangeNotifier {
     return _items.length;
   }
 
-  totalAmount() {
-    var total = 0.0;
+  double totalAmount() {
+    double total = 0.0;
     _items.forEach((key, value) {
       total += value.price * value.quantity;
     });
