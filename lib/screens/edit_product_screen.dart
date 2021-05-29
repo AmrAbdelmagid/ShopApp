@@ -29,6 +29,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   _saveForm() {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
     _form.currentState.save();
     print(_editedProduct.title);
     print(_editedProduct.description);
@@ -48,6 +52,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   _updateImage() {
     if (!_imageUrlFocusNode.hasFocus) {
+      if ((!_imageUrlController.text.startsWith('http://') &&
+              !_imageUrlController.text.startsWith('https://')) ||
+          (!_imageUrlController.text.endsWith('.png') &&
+              !_imageUrlController.text.endsWith('.jpg') &&
+              !_imageUrlController.text.endsWith('.jpeg'))) {
+        setState(() {});
+        return;
+      }
       setState(() {});
     }
   }
@@ -60,6 +72,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         actions: [
           IconButton(
             onPressed: () {
+              setState(() {});
               _saveForm();
             },
             icon: Icon(Icons.save),
@@ -86,6 +99,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       imageUrl: _editedProduct.imageUrl,
                       price: _editedProduct.price);
                 },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a value.';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'price'),
@@ -101,7 +120,19 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       title: _editedProduct.title,
                       description: _editedProduct.description,
                       imageUrl: _editedProduct.imageUrl,
-                      price: double.parse(value));
+                      price: double.tryParse(value));
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a value.';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'please enter a valid value.';
+                  }
+                  if (double.parse(value) <= 0) {
+                    return 'please enter a number grater than zero.';
+                  }
+                  return null;
                 },
               ),
               TextFormField(
@@ -116,6 +147,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       description: value,
                       imageUrl: _editedProduct.imageUrl,
                       price: _editedProduct.price);
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a value.';
+                  }
+                  if (value.length < 10) {
+                    return 'please enter a description grater than 10 characters.';
+                  }
+                  return null;
                 },
               ),
               Row(
@@ -134,6 +174,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             child: Image.network(
                               _imageUrlController.text,
                               fit: BoxFit.cover,
+                              errorBuilder: (context,ex,st) {
+                                return Container(
+                                  height: 100,
+                                  width: 100,
+                                  child: Text('ENTER URL'),
+                                );
+                              },
                             ),
                           ),
                   ),
@@ -155,8 +202,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             imageUrl: value,
                             price: _editedProduct.price);
                       },
-                      onFieldSubmitted: (_){
+                      onFieldSubmitted: (_) {
                         _saveForm();
+                      },
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter a value.';
+                        }
+                        if (!value.startsWith('http://') &&
+                            !value.startsWith('https://')) {
+                          return 'please enter a valid url';
+                        }
+                        if (!_imageUrlController.text.endsWith('.png') &&
+                            !_imageUrlController.text.endsWith('.jpg') &&
+                            !_imageUrlController.text.endsWith('.jpeg')){
+                          return 'please enter a valid url';
+                        }
+                        return null;
                       },
                     ),
                   )
