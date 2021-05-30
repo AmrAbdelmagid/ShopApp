@@ -27,6 +27,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
     imageUrl: '',
   );
 
+  var _initialValues = {
+    'price':'',
+    'title': '',
+    'description': '',
+    'imageUrl': '',
+  };
+
+
+
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImage);
@@ -40,17 +49,24 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (_isInit) {
       final productId = ModalRoute.of(context).settings.arguments as String;
       if (productId != null){
-        final loadedProduct =
+        _editedProduct =
         Provider.of<ProductsProvider>(context, listen: false)
             .findById(productId);
-        _editedProduct = Product(
-            id: productId,
-            title: loadedProduct.title,
-            description: loadedProduct.description,
-            // imageUrl: loadedProduct.imageUrl,
-            imageUrl: '',
-            price: loadedProduct.price);
-        _imageUrlController.text = loadedProduct.imageUrl;
+        _initialValues = {
+          'price':_editedProduct.price.toString(),
+          'title': _editedProduct.title,
+          'description': _editedProduct.description,
+          'imageUrl': '',
+        };
+        // _editedProduct = Product(
+        //     id: productId,
+        //     isFavorite: loadedProduct.isFavorite,
+        //     title: loadedProduct.title,
+        //     description: loadedProduct.description,
+        //     // imageUrl: loadedProduct.imageUrl,
+        //     imageUrl: '',
+        //     price: loadedProduct.price);
+        _imageUrlController.text = _editedProduct.imageUrl;
       }
 
     }
@@ -123,7 +139,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'title'),
                 textInputAction: TextInputAction.next,
-                initialValue: _editedProduct.title,
+                initialValue: _initialValues['title'],
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
@@ -148,7 +164,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
-                initialValue: _editedProduct.price.toString(),
+                initialValue: _initialValues['price'],
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
@@ -179,7 +195,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 keyboardType: TextInputType.multiline,
                 maxLines: 3,
                 focusNode: _descriptionFocusNode,
-                initialValue: _editedProduct.description,
+                initialValue: _initialValues['description'],
                 onSaved: (value) {
                   _editedProduct = Product(
                       id: _editedProduct.id,
