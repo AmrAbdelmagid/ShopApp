@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:untitled1/providers/product.dart';
 import 'package:untitled1/providers/products_provider.dart';
 
+// this is not the best practice of using Forms in flutter
+// but it is just for learning!
+
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product-screen';
 
@@ -30,14 +33,29 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.initState();
   }
 
-  _saveForm() {
-    final isValid = _form.currentState.validate();
-    if (!isValid) {
-      return;
+  bool _isInit = true;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final productId = ModalRoute.of(context).settings.arguments as String;
+      if (productId != null){
+        final loadedProduct =
+        Provider.of<ProductsProvider>(context, listen: false)
+            .findById(productId);
+        _editedProduct = Product(
+            id: productId,
+            title: loadedProduct.title,
+            description: loadedProduct.description,
+            // imageUrl: loadedProduct.imageUrl,
+            imageUrl: '',
+            price: loadedProduct.price);
+        _imageUrlController.text = loadedProduct.imageUrl;
+      }
+
     }
-    _form.currentState.save();
-    Provider.of<ProductsProvider>(context,listen: false).addProduct(_editedProduct);
-    Navigator.pop(context);
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   @override
@@ -48,6 +66,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _imageUrlController.dispose();
     _imageUrlFocusNode.dispose();
     super.dispose();
+  }
+
+  _saveForm() {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
+    _form.currentState.save();
+    if (_editedProduct.id == null) {
+      Provider.of<ProductsProvider>(context, listen: false)
+          .addProduct(_editedProduct);
+      Navigator.pop(context);
+    } else {
+      Provider.of<ProductsProvider>(context, listen: false)
+          .updateProduct(_editedProduct.id, _editedProduct);
+      Navigator.pop(context);
+    }
   }
 
   _updateImage() {
@@ -88,12 +123,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'title'),
                 textInputAction: TextInputAction.next,
+                initialValue: _editedProduct.title,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
                 onSaved: (value) {
                   _editedProduct = Product(
-                      id: null,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite,
                       title: value,
                       description: _editedProduct.description,
                       imageUrl: _editedProduct.imageUrl,
@@ -111,12 +148,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
+                initialValue: _editedProduct.price.toString(),
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
                 onSaved: (value) {
                   _editedProduct = Product(
-                      id: null,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite,
                       title: _editedProduct.title,
                       description: _editedProduct.description,
                       imageUrl: _editedProduct.imageUrl,
@@ -140,9 +179,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 keyboardType: TextInputType.multiline,
                 maxLines: 3,
                 focusNode: _descriptionFocusNode,
+                initialValue: _editedProduct.description,
                 onSaved: (value) {
                   _editedProduct = Product(
-                      id: null,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite,
                       title: _editedProduct.title,
                       description: value,
                       imageUrl: _editedProduct.imageUrl,
@@ -174,7 +215,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             child: Image.network(
                               _imageUrlController.text,
                               fit: BoxFit.cover,
-                              errorBuilder: (context,ex,st) {
+                              errorBuilder: (context, ex, st) {
                                 return Container(
                                   height: 100,
                                   width: 100,
@@ -196,7 +237,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       },
                       onSaved: (value) {
                         _editedProduct = Product(
-                            id: null,
+                            id: _editedProduct.id,
+                            isFavorite: _editedProduct.isFavorite,
                             title: _editedProduct.title,
                             description: _editedProduct.description,
                             imageUrl: value,
@@ -205,7 +247,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       onFieldSubmitted: (_) {
                         _saveForm();
                       },
-                      onChanged: (_){
+                      onChanged: (_) {
                         setState(() {});
                       },
                       validator: (value) {
@@ -218,7 +260,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         }
                         if (!_imageUrlController.text.endsWith('.png') &&
                             !_imageUrlController.text.endsWith('.jpg') &&
-                            !_imageUrlController.text.endsWith('.jpeg')){
+                            !_imageUrlController.text.endsWith('.jpeg')) {
                           return 'please enter a valid url';
                         }
                         return null;

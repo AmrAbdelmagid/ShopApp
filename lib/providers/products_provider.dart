@@ -70,6 +70,17 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  updateProduct(String id, Product product) {
+    final editedProductIndex = _items.indexWhere((element) => element.id == id);
+    if(editedProductIndex >= 0){
+      _items[editedProductIndex] = product;
+      notifyListeners();
+    } else {
+      print('not found!');
+    }
+
+  }
+
   Product findById(String id) {
     return _items.firstWhere((prod) => prod.id == id);
   }
