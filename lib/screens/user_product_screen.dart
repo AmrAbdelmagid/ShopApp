@@ -5,8 +5,12 @@ import 'package:untitled1/screens/edit_product_screen.dart';
 import 'package:untitled1/widgets/app_drawer.dart';
 import 'package:untitled1/widgets/user_product_item.dart';
 
+import '../methods.dart';
+
 class UserProductScreen extends StatelessWidget {
   static const routeName = '/user-screen';
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,16 +23,19 @@ class UserProductScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      body: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Consumer<ProductsProvider>(
-          builder: (_, productData, ch) => ListView.builder(
-            itemBuilder: (_, i) => UserProductItem(
-              id: productData.items[i].id,
-              title: productData.items[i].title,
-              url: productData.items[i].imageUrl,
+      body: RefreshIndicator(
+        onRefresh: () => Methods.fetchProducts(context) ,
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Consumer<ProductsProvider>(
+            builder: (_, productData, ch) => ListView.builder(
+              itemBuilder: (_, i) => UserProductItem(
+                id: productData.items[i].id,
+                title: productData.items[i].title,
+                url: productData.items[i].imageUrl,
+              ),
+              itemCount: productData.items.length,
             ),
-            itemCount: productData.items.length,
           ),
         ),
       ),

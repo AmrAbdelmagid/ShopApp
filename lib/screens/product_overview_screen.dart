@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:untitled1/providers/cart.dart';
 import 'package:untitled1/providers/products_provider.dart';
 import 'package:untitled1/screens/cart_screen.dart';
+import 'package:untitled1/screens/user_product_screen.dart';
 import 'package:untitled1/widgets/app_drawer.dart';
 import 'package:untitled1/widgets/badge.dart';
 import 'package:untitled1/widgets/products_grid.dart';
+
+import '../methods.dart';
 
 enum FilterOptions {
   Favorites,
@@ -82,13 +85,16 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : ProductsGrid(showFavorites),
+      body: RefreshIndicator(
+        onRefresh: () => Methods.fetchProducts(context),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _isLoading
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : ProductsGrid(showFavorites),
+        ),
       ),
     );
   }
