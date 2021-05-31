@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/providers/product.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProductsProvider with ChangeNotifier {
   List<Product> _items = [
@@ -59,29 +61,42 @@ class ProductsProvider with ChangeNotifier {
   //   _showFavoritesOnly = false;
   //   notifyListeners();
   // }
-  addProduct(Product product) {
-    final newProduct = Product(
-        id: DateTime.now().toString(),
-        title: product.title,
-        description: product.description,
-        imageUrl: product.imageUrl,
-        price: product.price);
-    _items.add(newProduct);
-    notifyListeners();
+  Future<void> addProduct(Product product) {
+    final url = Uri.parse(
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products.json');
+    return http
+        .post(url,
+            body: json.encode({
+              'title': product.title,
+              'price': product.price,
+              'description': product.description,
+              'imageUrl': product.imageUrl,
+              'isFavourite': product.isFavorite,
+            }))
+        .then((response) {
+          print(json.decode(response.body));
+      final newProduct = Product(
+          id: json.decode(response.body)['name'],
+          title: product.title,
+          description: product.description,
+          imageUrl: product.imageUrl,
+          price: product.price);
+      _items.add(newProduct);
+      notifyListeners();
+    });
   }
 
   updateProduct(String id, Product product) {
     final editedProductIndex = _items.indexWhere((element) => element.id == id);
-    if(editedProductIndex >= 0){
+    if (editedProductIndex >= 0) {
       _items[editedProductIndex] = product;
       notifyListeners();
     } else {
       print('not found!');
     }
-
   }
 
-  deleteProduct(String id){
+  deleteProduct(String id) {
     _items.removeWhere((element) => element.id == id);
     notifyListeners();
   }
