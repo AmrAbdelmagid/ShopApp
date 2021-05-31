@@ -61,20 +61,20 @@ class ProductsProvider with ChangeNotifier {
   //   _showFavoritesOnly = false;
   //   notifyListeners();
   // }
-  Future<void> addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
     final url = Uri.parse(
         'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products.json');
-    return http
-        .post(url,
-            body: json.encode({
-              'title': product.title,
-              'price': product.price,
-              'description': product.description,
-              'imageUrl': product.imageUrl,
-              'isFavourite': product.isFavorite,
-            }))
-        .then((response) {
-          print(json.decode(response.body));
+    try {
+      final response = await http.post(url,
+          body: json.encode({
+            'title': product.title,
+            'price': product.price,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'isFavourite': product.isFavorite,
+          }));
+
+      print(json.decode(response.body));
       final newProduct = Product(
           id: json.decode(response.body)['name'],
           title: product.title,
@@ -83,10 +83,10 @@ class ProductsProvider with ChangeNotifier {
           price: product.price);
       _items.add(newProduct);
       notifyListeners();
-    }).catchError((error){
+    } catch (error) {
       print(error);
       throw error;
-    });
+    }
   }
 
   updateProduct(String id, Product product) {
