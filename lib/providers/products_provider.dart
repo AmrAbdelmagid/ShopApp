@@ -114,18 +114,35 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  updateProduct(String id, Product product) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final editedProductIndex = _items.indexWhere((element) => element.id == id);
-    if (editedProductIndex >= 0) {
-      _items[editedProductIndex] = product;
+    try {
+      final url = Uri.parse(
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
+      await http.patch(url,
+          body: json.encode({
+            'title': newProduct.title,
+            'price': newProduct.price,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+          }));
+      _items[editedProductIndex] = newProduct;
       notifyListeners();
-    } else {
-      print('not found!');
+    } catch (error) {
+      throw error;
     }
   }
 
   deleteProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
+    final url = Uri.parse(
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.');
+    final deletedProdIndex = _items.indexWhere((element) => element.id == id);
+    final referenceProd = _items[deletedProdIndex];
+    _items.removeAt(deletedProdIndex);
+    http.delete(url).then((_) => referenceProd == null).catchError((error) {
+      _items.insert(deletedProdIndex, referenceProd);
+      notifyListeners();
+    });
     notifyListeners();
   }
 
