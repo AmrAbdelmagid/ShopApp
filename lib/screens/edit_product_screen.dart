@@ -202,7 +202,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             title: _editedProduct.title,
                             description: _editedProduct.description,
                             imageUrl: _editedProduct.imageUrl,
-                            price: double.tryParse(value));
+                            price: double.parse(value).toDouble());
                       },
                       validator: (value) {
                         if (value.isEmpty) {

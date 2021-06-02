@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/models/http_exeption.dart';
 import 'package:untitled1/providers/product.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -76,7 +77,7 @@ class ProductsProvider with ChangeNotifier {
           title: prodData['title'],
           description: prodData['description'],
           price: prodData['price'],
-          imageUrl: prodData['imageUrl'],
+          imageUrl:prodData['imageUrl'],
           isFavorite: prodData['isFavourite'],
         ));
       });
@@ -98,8 +99,6 @@ class ProductsProvider with ChangeNotifier {
             'imageUrl': product.imageUrl,
             'isFavourite': product.isFavorite,
           }));
-
-      print(json.decode(response.body));
       final newProduct = Product(
           id: json.decode(response.body)['name'],
           title: product.title,
@@ -133,17 +132,21 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async{
+
     final url = Uri.parse(
-        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.');
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
     final deletedProdIndex = _items.indexWhere((element) => element.id == id);
-    final referenceProd = _items[deletedProdIndex];
+    Product referenceProd = _items[deletedProdIndex];
     _items.removeAt(deletedProdIndex);
-    http.delete(url).then((_) => referenceProd == null).catchError((error) {
+    notifyListeners();
+    final response = await http.delete(url);
+    if (response.statusCode >= 400){
       _items.insert(deletedProdIndex, referenceProd);
       notifyListeners();
-    });
-    notifyListeners();
+      throw HttpException('Could not delete the Product');
+    }
+    referenceProd = null;
   }
 
   Product findById(String id) {

@@ -19,10 +19,12 @@ class ProductDetailScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Container(
-            child: Image.network(
-              loadedProduct.imageUrl,
-              fit: BoxFit.cover,
+          Center(
+            child: Container(
+              child: Image.network(
+                loadedProduct.imageUrl,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           SizedBox(height: 10),
