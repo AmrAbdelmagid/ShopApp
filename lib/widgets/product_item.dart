@@ -42,8 +42,9 @@ class ProductItem extends StatelessWidget {
                 onPressed: () async {
                   product.toggleFavoriteStatue();
                   try {
-                    await Provider.of<ProductsProvider>(context, listen: false)
+                    final response = await Provider.of<ProductsProvider>(context, listen: false)
                         .updateProductFavoriteStatus(product.id, product);
+
                   } catch (error) {
                     scaffoldMessenger.showSnackBar(SnackBar(
                       content: Text(

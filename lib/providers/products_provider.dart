@@ -1,9 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:untitled1/models/http_exeption.dart';
 import 'package:untitled1/providers/product.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http; //imp http package throw it's errors through gust post and get requests, for patch, put and delete use status code instead!.
 import 'dart:convert';
 
 class ProductsProvider with ChangeNotifier {
@@ -139,13 +137,15 @@ class ProductsProvider with ChangeNotifier {
     final editedProductIndex = _items.indexWhere((element) => element.id == id);
     try {
       final url = Uri.parse(
-          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.jon');
       await http.patch(url,
           body: json.encode({
             'isFavourite': editedProductFavStatus.isFavorite,
           }));
       _items[editedProductIndex] = editedProductFavStatus;
       notifyListeners();
+      //TODO handle error here!
+
     } catch (error) {
       editedProductFavStatus.toggleFavoriteStatue();
       throw HttpException('Could not change favourite status!');
