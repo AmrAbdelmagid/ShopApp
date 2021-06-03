@@ -24,6 +24,39 @@ class OrdersProvider with ChangeNotifier {
     return [..._orders];
   }
 
+  Future<void> fetchOrders() async {
+    final url = Uri.parse(
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/orders.json');
+    final response = await http.get(url);
+    //print(json.decode(response.body));
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    if (extractedData == null) {
+      return;
+    }
+    List<OrderItem> loadedOrders = [];
+    extractedData.forEach((ordId, ordData) {
+      loadedOrders.add(
+        OrderItem(
+          id: ordId,
+          amount: double.parse(ordData['amount'].toString()).toDouble(),
+          dateTime: DateTime.parse(ordData['date-time']),
+          products: (ordData['products'] as List<dynamic>)
+              .map(
+                (item) => CartItem(
+                  id: item['id'],
+                  title: item['title'],
+                  price: double.parse(item['price'].toString()).toDouble(),
+                  quantity: item['quantity'],
+                ),
+              )
+              .toList(),
+        ),
+      );
+      _orders = loadedOrders.reversed.toList();
+      notifyListeners();
+    });
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final url = Uri.parse(
         'https://max-shop-app-c690c-default-rtdb.firebaseio.com/orders.json');
