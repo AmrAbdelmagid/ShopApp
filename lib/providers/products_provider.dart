@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:untitled1/models/http_exeption.dart';
 import 'package:untitled1/providers/product.dart';
@@ -77,7 +79,7 @@ class ProductsProvider with ChangeNotifier {
           title: prodData['title'],
           description: prodData['description'],
           price: prodData['price'],
-          imageUrl:prodData['imageUrl'],
+          imageUrl: prodData['imageUrl'],
           isFavorite: prodData['isFavourite'],
         ));
       });
@@ -132,8 +134,25 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteProduct(String id) async{
+  Future<void> updateProductFavoriteStatus(
+      String id, Product editedProductFavStatus) async {
+    final editedProductIndex = _items.indexWhere((element) => element.id == id);
+    try {
+      final url = Uri.parse(
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
+      await http.patch(url,
+          body: json.encode({
+            'isFavourite': editedProductFavStatus.isFavorite,
+          }));
+      _items[editedProductIndex] = editedProductFavStatus;
+      notifyListeners();
+    } catch (error) {
+      editedProductFavStatus.toggleFavoriteStatue();
+      throw HttpException('Could not change favourite status!');
+    }
+  }
 
+  Future<void> deleteProduct(String id) async {
     final url = Uri.parse(
         'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
     final deletedProdIndex = _items.indexWhere((element) => element.id == id);
@@ -141,7 +160,7 @@ class ProductsProvider with ChangeNotifier {
     _items.removeAt(deletedProdIndex);
     notifyListeners();
     final response = await http.delete(url);
-    if (response.statusCode >= 400){
+    if (response.statusCode >= 400) {
       _items.insert(deletedProdIndex, referenceProd);
       notifyListeners();
       throw HttpException('Could not delete the Product');

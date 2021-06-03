@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/providers/cart.dart';
 import 'package:untitled1/providers/product.dart';
+import 'package:untitled1/providers/products_provider.dart';
 import '../screens/product_detail_screen.dart';
 
 class ProductItem extends StatelessWidget {
@@ -12,6 +13,7 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<CartProvider>(context, listen: false);
     return ClipRRect(
@@ -37,8 +39,20 @@ class ProductItem extends StatelessWidget {
                 icon: Icon(product.isFavorite
                     ? Icons.favorite
                     : Icons.favorite_border),
-                onPressed: () {
+                onPressed: () async {
                   product.toggleFavoriteStatue();
+                  try {
+                    await Provider.of<ProductsProvider>(context, listen: false)
+                        .updateProductFavoriteStatus(product.id, product);
+                  } catch (error) {
+                    scaffoldMessenger.showSnackBar(SnackBar(
+                      content: Text(
+                        'Could not change favourite status!',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      duration: Duration(seconds: 2),
+                    ));
+                  }
                 },
                 color: Theme.of(context).accentColor,
               ),
