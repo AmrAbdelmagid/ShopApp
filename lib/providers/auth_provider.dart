@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:untitled1/models/http_exception.dart';
+
 class AuthProvider with ChangeNotifier {
   String _token;
   String _expiryDate;
@@ -11,13 +13,22 @@ class AuthProvider with ChangeNotifier {
       String urlSegment) async {
     Uri _url = Uri.parse(
         'https://identitytoolkit.googleapis.com/v1/$urlSegment?key=AIzaSyAI_pfaaSFhXxitGKogrRNfzr2sWXr56so');
-    final response = await http.post(_url,
-        body: json.encode({
-          'email': email,
-          'password': password,
-          'returnSecureToken': true,
-        }));
-    print(response.body);
+    try{
+      final response = await http.post(_url,
+          body: json.encode({
+            'email': email,
+            'password': password,
+            'returnSecureToken': true,
+          }));
+      final responseData = json.decode(response.body);
+      if (responseData['error'] != null){ //I do that as firebase is not returning errors like
+        print('here');
+        throw HttpException(responseData['error']['message']);
+      }
+    }catch(error){
+      print(error);
+      throw error;
+    }
   }
 
   Future<void> signup(String email, String password) async {
