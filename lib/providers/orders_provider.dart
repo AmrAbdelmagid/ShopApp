@@ -24,9 +24,13 @@ class OrdersProvider with ChangeNotifier {
     return [..._orders];
   }
 
+  final String authToken;
+  final String userId;
+  OrdersProvider(this.authToken,this.userId,this._orders);
+
   Future<void> fetchOrders() async {
     final url = Uri.parse(
-        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/orders.json');
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken');
     final response = await http.get(url);
     //print(json.decode(response.body));
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -59,7 +63,7 @@ class OrdersProvider with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final url = Uri.parse(
-        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/orders.json');
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken');
     try {
       final timestamp = DateTime.now();
       final response = await http.post(url,

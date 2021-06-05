@@ -5,8 +5,12 @@ import 'package:http/http.dart' as http; //imp http package throw it's errors th
 import 'dart:convert';
 
 class ProductsProvider with ChangeNotifier {
+  final String authToken;
+  final String userId;
+  ProductsProvider(this.authToken,this.userId,this._items);
   final _url = Uri.parse(
       'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products.json');
+  //TODO handle URLs
 
   List<Product> _items = [
     // Product(
@@ -66,13 +70,19 @@ class ProductsProvider with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> fetchAndSetProduct() async {
+    Future<void> fetchAndSetProduct([bool filterByUser = false]) async {
+    String filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     try {
-      final response = await http.get(_url);
+      final response = await http.get(Uri.parse(
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString'));
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       if (extractedData == null){
         return;
       }
+      final url = Uri.parse(
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/userFavourites/$userId.json?auth=$authToken');
+      final favouritesResponse = await http.get(url);
+      final favouritesData = json.decode(favouritesResponse.body);
       final List<Product> loadedProduct = [];
       extractedData.forEach((prodId, prodData) {
         loadedProduct.add(Product(
@@ -81,7 +91,7 @@ class ProductsProvider with ChangeNotifier {
           description: prodData['description'],
           price: prodData['price'],
           imageUrl: prodData['imageUrl'],
-          isFavorite: prodData['isFavourite'],
+          isFavorite: favouritesData == null ? false : favouritesData[prodId] ?? false,
         ));
       });
       _items = loadedProduct;
@@ -93,14 +103,16 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
+    final _url = Uri.parse(
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.post(_url,
           body: json.encode({
+            'creatorId': userId,
             'title': product.title,
             'price': product.price,
             'description': product.description,
             'imageUrl': product.imageUrl,
-            'isFavourite': product.isFavorite,
           }));
       final newProduct = Product(
           id: json.decode(response.body)['name'],
@@ -120,7 +132,7 @@ class ProductsProvider with ChangeNotifier {
     final editedProductIndex = _items.indexWhere((element) => element.id == id);
     try {
       final url = Uri.parse(
-          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
       await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
@@ -140,11 +152,11 @@ class ProductsProvider with ChangeNotifier {
     final editedProductIndex = _items.indexWhere((element) => element.id == id);
     try {
       final url = Uri.parse(
-          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.jon');
-      await http.patch(url,
-          body: json.encode({
-            'isFavourite': editedProductFavStatus.isFavorite,
-          }));
+          'https://max-shop-app-c690c-default-rtdb.firebaseio.com/userFavourites/$userId/$id.json?auth=$authToken');
+      await http.put(url,
+          body: json.encode(
+            editedProductFavStatus.isFavorite,
+          ));
       _items[editedProductIndex] = editedProductFavStatus;
       notifyListeners();
       //TODO handle error here!
@@ -157,7 +169,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final url = Uri.parse(
-        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json');
+        'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     final deletedProdIndex = _items.indexWhere((element) => element.id == id);
     Product referenceProd = _items[deletedProdIndex];
     _items.removeAt(deletedProdIndex);

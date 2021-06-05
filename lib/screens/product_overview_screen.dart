@@ -85,7 +85,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => Methods.fetchProducts(context),
+        onRefresh: () => Provider.of<ProductsProvider>(context,listen: false).fetchAndSetProduct(),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: _isLoading
