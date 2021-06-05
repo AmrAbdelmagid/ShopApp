@@ -4,7 +4,7 @@ class Product with ChangeNotifier{
   final String id;
   final String title;
   final String description;
-  final double price;
+  var price;
   final String imageUrl;
   bool isFavorite;
 

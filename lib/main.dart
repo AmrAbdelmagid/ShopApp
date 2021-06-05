@@ -8,6 +8,7 @@ import 'package:untitled1/screens/cart_screen.dart';
 import 'package:untitled1/screens/edit_product_screen.dart';
 import 'package:untitled1/screens/orders_screen.dart';
 import 'package:untitled1/screens/product_overview_screen.dart';
+import 'package:untitled1/screens/splash_screen.dart';
 import 'package:untitled1/screens/user_product_screen.dart';
 import './screens/product_detail_screen.dart';
 import 'package:provider/provider.dart';
@@ -29,13 +30,13 @@ class MyApp extends StatelessWidget {
               authData.token,
               authData.userId,
               previousProducts == null ? [] : previousProducts.items),
-          create: (_) => ProductsProvider(null,null, []),
+          create: (_) => ProductsProvider(null, null, []),
         ),
         ChangeNotifierProvider(
           create: (_) => CartProvider(),
         ),
         ChangeNotifierProxyProvider<AuthProvider, OrdersProvider>(
-          create: (_) => OrdersProvider(null,null, []),
+          create: (_) => OrdersProvider(null, null, []),
           update: (ctx, authData, previousOrders) => OrdersProvider(
             authData.token,
             authData.userId,
@@ -51,7 +52,16 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.purple,
               accentColor: Colors.deepOrange,
               fontFamily: 'Lato'),
-          home: auth.isAuth ? ProductOverviewScreen() : AuthScreen(),
+          home: auth.isAuth
+              ? ProductOverviewScreen()
+              : FutureBuilder(
+                  future: auth.tryAutoLogin(),
+                  builder: (ctx, authResultSnapshot) =>
+                      authResultSnapshot.connectionState ==
+                              ConnectionState.waiting
+                          ? SplashScreen()
+                          : AuthScreen(),
+                ),
           routes: {
             ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
             CartScreen.routeName: (context) => CartScreen(),
