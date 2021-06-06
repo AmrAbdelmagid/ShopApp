@@ -26,9 +26,15 @@ class ProductItem extends StatelessWidget {
           );
         },
         child: GridTile(
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
+          child: Hero(
+            tag: product.id,
+            child: FadeInImage(
+              placeholder: AssetImage('assets/images/product-placeholder.png'),
+              image: NetworkImage(
+                product.imageUrl,
+              ),
+              fit: BoxFit.cover,
+            ),
           ),
           footer: GridTileBar(
             title: Text(product.title, textAlign: TextAlign.center),
@@ -42,9 +48,10 @@ class ProductItem extends StatelessWidget {
                 onPressed: () async {
                   product.toggleFavoriteStatue();
                   try {
-                    final response = await Provider.of<ProductsProvider>(context, listen: false)
+                    final response = await Provider.of<ProductsProvider>(
+                            context,
+                            listen: false)
                         .updateProductFavoriteStatus(product.id, product);
-
                   } catch (error) {
                     scaffoldMessenger.showSnackBar(SnackBar(
                       content: Text(

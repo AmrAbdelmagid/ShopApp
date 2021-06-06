@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/helpers.dart';
 import 'package:untitled1/providers/auth_provider.dart';
 import 'package:untitled1/providers/cart.dart';
 import 'package:untitled1/providers/orders_provider.dart';
@@ -26,11 +27,11 @@ class MyApp extends StatelessWidget {
           create: (_) => AuthProvider(),
         ),
         ChangeNotifierProxyProvider<AuthProvider, ProductsProvider>(
-          update: (ctx, authData, previousProducts) => ProductsProvider(
+          update: (ctx, authData, previousProducts) => previousProducts..updates(
               authData.token,
               authData.userId,
-              previousProducts == null ? [] : previousProducts.items),
-          create: (_) => ProductsProvider(null, null, []),
+             ),
+          create: (_) => ProductsProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => CartProvider(),
@@ -49,6 +50,12 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Shop App',
           theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: CustomPageTransitionBuilder(),
+                TargetPlatform.iOS: CustomPageTransitionBuilder(),
+              },
+            ),
               primarySwatch: Colors.purple,
               accentColor: Colors.deepOrange,
               fontFamily: 'Lato'),

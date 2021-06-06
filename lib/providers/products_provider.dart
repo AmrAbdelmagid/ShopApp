@@ -5,9 +5,19 @@ import 'package:http/http.dart' as http; //imp http package throw it's errors th
 import 'dart:convert';
 
 class ProductsProvider with ChangeNotifier {
-  final String authToken;
-  final String userId;
-  ProductsProvider(this.authToken,this.userId,this._items);
+  String authToken;
+  String userId;
+  //ProductsProvider(this.authToken,this.userId,this._items);
+  void updates (String token, String userId){
+     this.authToken = token;
+     this.userId = userId;
+  }
+  // void updates(String token,String userid){
+  //   this.userid = userid;
+  //   this.token =  token;
+  //
+  // }
+
   final _url = Uri.parse(
       'https://max-shop-app-c690c-default-rtdb.firebaseio.com/products.json');
   //TODO handle URLs
