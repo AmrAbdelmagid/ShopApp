@@ -82,3 +82,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// first version of this app was finished.
